@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saturno Floral Verificado</title>
+    <style>
+        :root {
+            --space-bg: #010206;
+            --saturn-grad: radial-gradient(circle at 30% 30%, #f9d976, #d4a373 60%, #3d2b1f 100%);
+            /* Tamaños de Super Saturno y Super Flores */
+            --saturn-size: 35vmin; 
+            --flower-size: 10vmin;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background-color: var(--space-bg);
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- Fondo de Espacio --- */
+        #space {
+            position: absolute;
+            width: 100%; height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--t) infinite ease-in-out;
+        }
+
+        /* TRAYECTORIA DE COMETAS MEJORADA (Izquierda Arriba a Derecha Abajo) */
+        .comet {
+            position: absolute;
+            width: 2px;
+            height: 120px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 70%, white 100%);
+            opacity: 0;
+            filter: drop-shadow(0 0 5px white);
+            pointer-events: none;
+            animation: shoot var(--d) linear forwards;
+            transform-origin: center top;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        @keyframes shoot {
+            0% { 
+                transform: translate(-10vw, -10vh) rotate(-45deg) scaleY(0); 
+                opacity: 0; 
+            }
+            10% { opacity: 1; scaleY(1); }
+            90% { opacity: 1; }
+            100% { 
+                transform: translate(110vw, 110vh) rotate(-45deg); 
+                opacity: 0; 
+            }
+        }
+
+        #universe {
+            position: relative;
+            width: 100vw; height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 2500px;
+        }
+
+        /* --- Saturno (z-index 100 para profundidad) --- */
+        #saturn {
+            position: absolute;
+            width: var(--saturn-size);
+            height: var(--saturn-size);
+            background: var(--saturn-grad);
+            border-radius: 50%;
+            z-index: 100; /* Punto medio de profundidad */
+            cursor: pointer;
+            box-shadow: 0 0 80px rgba(249, 217, 118, 0.15), inset -15px -15px 40px rgba(0,0,0,0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #saturn:hover { transform: scale(1.05); }
+
+        /* --- Anillo Floral TILTED --- */
+        #ring {
+            position: absolute;
+            width: 100%; height: 100%;
+            transform-style: preserve-3d;
+            transform: rotateX(75deg); /* Inclinación visual */
+            pointer-events: none;
+        }
+
+        .flower-node {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: var(--flower-size);
+            height: var(--flower-size);
+            pointer-events: auto;
+            transform-style: preserve-3d;
+            /* El z-index se maneja por JS */
+        }
+
+        .flower-content {
+            position: relative;
+            width: 100%; height: 100%;
+            /* Billboard: contrarresta la inclinación del anillo */
+            transform: rotateX(-75deg); 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- CORRECCIÓN FINAL DE PÉTALOS: Concentricidad Perfecta --- */
+        .flower-core {
+            width: 20%; height: 20%;
+            background: #d35400;
+            border-radius: 50%;
+            z-index: 10;
+            box-shadow: 0 0 8px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+        .petal {
+            position: absolute;
+            width: 50%; height: 20%;
+            background: #ffeb3b;
+            border-radius: 50px;
+            left: 50%; top: 50%;
+            /* El origen es el inicio del pétalo (centro de la flor) */
+            transform-origin: 0% 50%; 
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* --- Mensaje de Dedicatoria Actualizado --- */
+        #dedication {
+            position: absolute;
+            top: 10%;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            text-align: center;
+            color: #1a1a1a;
+            font-size: clamp(1rem, 3vw, 1.4rem);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            z-index: 1000;
+            display: none;
+            width: 80%; max-width: 350px;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.3) translateY(-100px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .hint {
+            position: absolute;
+            bottom: 5%;
+            color: #f9d976;
+            letter-spacing: 4px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            opacity: 0.5;
+            z-index: 1; /* sobre estrellas, bajo planeta/flores */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="space"></div>
+
+    <div id="universe">
+        <div id="saturn" onclick="triggerLove()"></div>
+        <div id="ring"></div>
+        <div id="dedication">
+            🌻De todas las galaxias que existen, me alegra haber coincidido en esta contigo✨
+        </div>
+        <div class="hint">Toca el planeta</div>
+    </div>
+
+    <script>
+        const ring = document.getElementById('ring');
+        const space = document.getElementById('space');
+        const dedication = document.getElementById('dedication');
+        
+        // 1. Estrellas y Cometas
+        function initSpace() {
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 2.5 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.setProperty('--t', (2 + Math.random() * 3) + 's');
+                space.appendChild(star);
+            }
+        }
+
+        function spawnComet() {
+            const comet = document.createElement('div');
+            comet.className = 'comet';
+            const duration = 1.8 + Math.random() * 2.5; 
+            comet.style.setProperty('--d', duration + 's');
+            space.appendChild(comet);
+            setTimeout(() => comet.remove(), duration * 1000);
+            setTimeout(spawnComet, Math.random() * 3000 + 1000);
+        }
+
+        // 2. Flores
+        const totalFlowers = 14;
+        const flowers = [];
+        let radius = 0;
+
+        function createFlowers() {
+            ring.innerHTML = '';
+            flowers.length = 0;
+            for (let i = 0; i < totalFlowers; i++) {
+                const node = document.createElement('div');
+                node.className = 'flower-node';
+                const content = document.createElement('div');
+                content.className = 'flower-content';
+                content.innerHTML = '<div class="flower-core"></div>';
+                
+                // 8 Pétalos alineados perfectamente
+                for (let p = 0; p < 8; p++) {
+                    const petal = document.createElement('div');
+                    petal.className = 'petal';
+                    petal.style.transform = `rotate(${p * 45}deg) translateX(10%)`;
+                    content.appendChild(petal);
+                }
+                
+                node.appendChild(content);
+                ring.appendChild(node);
+                flowers.push({
+                    element: node,
+                    content: content,
+                    angle: (i / totalFlowers) * (Math.PI * 2)
+                });
+            }
+        }
+
+        // 3. Loop de Animación y Física de Profundidad
+        let rotation = 0;
+        function updateLayout() {
+            radius = Math.min(window.innerWidth, window.innerHeight) * 0.42;
+            createFlowers();
+        }
+
+        function animate() {
+            rotation += 0.0035; 
+            flowers.forEach(f => {
+                const currentAngle = f.angle + rotation;
+                const x = Math.cos(currentAngle) * radius;
+                const y = Math.sin(currentAngle) * radius;
+
+                f.element.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0)`;
+                
+                // --- OCLUSIÓN PERFECTA (Z-Index Dinámico) ---
+                // y negativo = arriba en pantalla (detrás de Saturno = z-index 100)
+                // y positivo = abajo en pantalla (frente a Saturno)
+                if (y < 0) {
+                    f.element.style.zIndex = "50"; 
+                } else {
+                    f.element.style.zIndex = "150"; 
+                }
+                
+                // Billboard: cara a la cámara
+                f.content.style.transform = `rotateX(-75deg) rotateZ(${-currentAngle * (180/Math.PI)}deg)`;
+            });
+            requestAnimationFrame(animate);
+        }
+
+        function triggerLove() {
+            dedication.style.display = 'block';
+            setTimeout(() => dedication.style.display = 'none', 6000);
+        }
+
+        window.addEventListener('resize', updateLayout);
+        initSpace();
+        spawnComet();
+        updateLayout();
+        animate();
+    </script>
+</body>
+</html>
